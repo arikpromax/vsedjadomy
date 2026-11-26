@@ -37,31 +37,44 @@ var PRODUCTS = {
 };
 
 function money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₴'; }
-function tag(t) {
-  if (t === 'sale') return '<span class="tg tg--sale"><svg class="ic"><use href="#i-gift"/></svg>Акція</span>';
-  if (t === 'hit') return '<span class="tg tg--hit">Хіт</span>';
-  if (t === 'new') return '<span class="tg tg--new">Новинка</span>';
-  if (t === 'parts') return '<span class="tg tg--parts">Частинами</span>';
-  if (t.indexOf('pct:') === 0) return '<span class="tg tg--pct">' + t.slice(4) + '</span>';
-  return '';
+function plural(n, one, few, many) {
+  var a = n % 10, b = n % 100;
+  if (a === 1 && b !== 11) return one;
+  if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return few;
+  return many;
 }
-function stars() { var s = ''; for (var i = 0; i < 5; i++) s += '<svg class="st"><use href="#i-star"/></svg>'; return s; }
 function card(x) {
+  var t = x.t || [];
+  var badges = [];
+  var pct = t.filter(function (v) { return v.indexOf('pct:') === 0; })[0];
+  if (pct) badges.push('<span class="bd">' + pct.slice(4) + '</span>');
+  else if (t.indexOf('sale') > -1) badges.push('<span class="bd">Акція</span>');
+  if (t.indexOf('hit') > -1) badges.push('<span class="bd bd--hit">Хіт</span>');
+  if (t.indexOf('new') > -1) badges.push('<span class="bd bd--new">Новинка</span>');
+  var parts = t.indexOf('parts') > -1 || x.p >= 3000;
   return '<article class="pc">' +
-    '<a href="#" class="pc__img ph"><svg class="ic"><use href="#i-img"/></svg></a>' +
-    '<div class="pc__col">' + (x.col || []).map(function (c, i) { return '<i' + (i ? '' : ' class="on"') + ' style="background:' + c + '"></i>'; }).join('') + '</div>' +
+    '<div class="pc__media">' +
+      '<a href="#" class="pc__img ph"><svg class="ic"><use href="#i-img"/></svg></a>' +
+      '<div class="pc__badges">' + badges.join('') + '</div>' +
+      '<div class="pc__btns">' +
+        '<button class="pc-fav" aria-label="В обране"><svg class="ic"><use href="#i-heart"/></svg></button>' +
+        '<button class="pc-cmp" aria-label="Порівняти"><svg class="ic"><use href="#i-scales"/></svg></button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="pc__rate"><svg class="pc__star"><use href="#i-star"/></svg><b>' + x.r.toFixed(1) + '</b><span>' + x.c + ' ' + plural(x.c, 'відгук', 'відгуки', 'відгуків') + '</span></div>' +
     '<h3><a href="#">' + x.n + '</a></h3>' +
-    '<div class="pc__tags">' + (x.t || []).map(tag).join('') + '</div>' +
-    '<div class="pc__meta"><span class="pc__stars">' + stars() + '</span><span class="pc__rate">' + x.r.toFixed(1) + '</span>' +
-      '<span class="pc__rev"><svg class="ic"><use href="#i-chat"/></svg>' + x.c + '</span>' +
-      '<span class="pc__act"><button class="pc-cmp" aria-label="Порівняти"><svg class="ic"><use href="#i-scales"/></svg></button>' +
-      '<button class="pc-fav" aria-label="В обране"><svg class="ic"><use href="#i-heart"/></svg></button></span></div>' +
-    '<div class="pc__foot"><div class="pc__price"><s>' + (x.o ? money(x.o) : '') + '</s><b' + (x.o ? ' class="hot"' : '') + '>' + money(x.p) + '</b></div>' +
-      '<button class="buy" data-name="' + x.n.replace(/"/g, '&quot;') + '" aria-label="Купити"><svg class="ic"><use href="#i-cart"/></svg></button></div>' +
+    '<div class="pc__col">' + (x.col || []).map(function (c, i) { return '<i' + (i ? '' : ' class="on"') + ' style="background:' + c + '"></i>'; }).join('') + '</div>' +
+    '<span class="pc__stock">В наявності</span>' +
+    '<div class="pc__cost">' +
+      (x.o ? '<div class="pc__old"><s>' + money(x.o) + '</s><em>−' + money(x.o - x.p) + '</em></div>' : '<div class="pc__old"></div>') +
+      '<b' + (x.o ? ' class="is-sale"' : '') + '>' + money(x.p) + '</b>' +
+      '<span class="pc__parts">' + (parts ? '<svg class="ic"><use href="#i-parts"/></svg>або ' + money(Math.ceil(x.p / 12)) + ' × 12 міс' : '') + '</span>' +
+    '</div>' +
+    '<button class="pc__buy" data-name="' + x.n.replace(/"/g, '&quot;') + '"><svg class="ic"><use href="#i-cart"/></svg>Купити</button>' +
     '</article>';
 }
 
-// render grids, collapse to the first row with a fade + red arrow (as on Allo)
+// render grids, collapsed to two rows with a fade + red arrow
 document.querySelectorAll('.grid[data-list]').forEach(function (grid) {
   grid.innerHTML = (PRODUCTS[grid.dataset.list] || []).map(card).join('');
   var wrap = document.createElement('div');
@@ -162,12 +175,13 @@ document.querySelectorAll('.grid[data-list]').forEach(function (grid) {
     clearTimeout(tt);
     tt = setTimeout(function () { toast.classList.remove('on'); }, 1800);
   }
-  var count = 0;
+  var count = 0, cmp = 0;
+  var cmpBadge = document.querySelectorAll('.hd__ic--cmp i');
   var badges = document.querySelectorAll('.hic--cart i, .tab-cart i');
   function paint() { badges.forEach(function (i) { i.textContent = count; i.dataset.n = count; }); }
   paint();
   document.addEventListener('click', function (e) {
-    var b = e.target.closest('.buy');
+    var b = e.target.closest('.buy, .pc__buy');
     if (b) {
       count++;
       paint();
@@ -181,7 +195,14 @@ document.querySelectorAll('.grid[data-list]').forEach(function (grid) {
     var f = e.target.closest('.pc-fav');
     if (f) { f.classList.toggle('on'); say(f.classList.contains('on') ? 'Додано в обране' : 'Прибрано з обраного'); return; }
     var m = e.target.closest('.pc-cmp');
-    if (m) { m.classList.toggle('on'); say(m.classList.contains('on') ? 'Додано до порівняння' : 'Прибрано з порівняння'); return; }
+    if (m) {
+      m.classList.toggle('on');
+      var on = m.classList.contains('on');
+      cmp += on ? 1 : -1;
+      cmpBadge.forEach(function (i) { i.textContent = cmp; i.dataset.n = cmp; });
+      say(on ? 'Додано до порівняння (' + cmp + ')' : 'Прибрано з порівняння');
+      return;
+    }
     var s = e.target.closest('.pills span');
     if (s) s.parentNode.querySelectorAll('span').forEach(function (x) { x.classList.toggle('on', x === s); });
   });
