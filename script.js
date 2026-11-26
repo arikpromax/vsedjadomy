@@ -67,10 +67,10 @@ function card(x) {
     '<span class="pc__stock">В наявності</span>' +
     '<div class="pc__cost">' +
       (x.o ? '<div class="pc__old"><s>' + money(x.o) + '</s><em>−' + money(x.o - x.p) + '</em></div>' : '<div class="pc__old"></div>') +
-      '<b' + (x.o ? ' class="is-sale"' : '') + '>' + money(x.p) + '</b>' +
+      '<div class="pc__row"><b' + (x.o ? ' class="is-sale"' : '') + '>' + money(x.p) + '</b>' +
+        '<button class="pc__buy" aria-label="Купити" data-name="' + x.n.replace(/"/g, '&quot;') + '"><svg class="ic"><use href="#i-cart"/></svg></button></div>' +
       '<span class="pc__parts">' + (parts ? '<svg class="ic"><use href="#i-parts"/></svg>або ' + money(Math.ceil(x.p / 12)) + ' × 12 міс' : '') + '</span>' +
     '</div>' +
-    '<button class="pc__buy" data-name="' + x.n.replace(/"/g, '&quot;') + '"><svg class="ic"><use href="#i-cart"/></svg>Купити</button>' +
     '</article>';
 }
 

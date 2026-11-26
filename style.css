@@ -603,3 +603,17 @@ ul{list-style:none}
   .hd__ic--cmp{order:5}
   .hd__ic--cmp i{top:auto;bottom:-6px;right:-8px;min-width:18px;height:18px;font-size:10.5px;line-height:18px}
 }
+
+/* compact: square cart button next to the price (as before) */
+.pc__cost{padding-top:8px}
+.pc__row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pc .pc__buy{width:44px;height:42px;margin:0;flex:none;border:0;border-radius:8px;background:var(--accent);color:#fff;gap:0}
+.pc .pc__buy .ic{width:20px;height:20px}
+.pc .pc__buy:hover{background:var(--accent-d)}
+.pc:hover .pc__buy{background:var(--accent);color:#fff}
+.pc:hover .pc__buy:hover{background:var(--accent-d)}
+.pc__parts{margin-top:2px}
+@container (max-width:200px){
+  .pc .pc__buy{width:38px;height:36px}
+  .pc .pc__buy .ic{width:18px;height:18px}
+}
