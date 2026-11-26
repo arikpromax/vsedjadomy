@@ -626,3 +626,18 @@ ul{list-style:none}
 .pc .pc__col:empty{display:none}
 .pc h3{margin:4px 0 6px}
 @media (max-width:760px){.pc{border-radius:0;padding:8px 8px 10px}}
+
+/* white photo placeholder; nothing on top of the photo — badges, favourite, compare sit under it */
+.pc .pc__img{background:#fff;color:#c2c6cc}
+.pc__media{margin:0 0 6px}
+.pc__bar{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:30px;margin-bottom:4px}
+.pc__bar .pc__badges{position:static;flex-direction:row;flex-wrap:wrap;gap:4px}
+.pc__bar .pc__btns{position:static;flex-direction:row;gap:2px;margin-left:auto}
+.pc__bar .pc-fav,.pc__bar .pc-cmp{width:30px;height:30px;background:none;box-shadow:none;color:#8a8f96;border-radius:6px}
+.pc__bar .pc-fav:hover,.pc__bar .pc-cmp:hover{color:var(--accent);background:var(--accent-l)}
+.pc__bar .pc-cmp.on{background:var(--accent-l);color:var(--accent)}
+.pc__bar .ic{width:20px;height:20px}
+@container (max-width:200px){
+  .pc__bar .pc-fav,.pc__bar .pc-cmp{width:26px;height:26px}
+  .pc__bar .ic{width:17px;height:17px}
+}
