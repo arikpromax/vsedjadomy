@@ -186,3 +186,21 @@ document.querySelectorAll('.grid[data-list]').forEach(function (grid) {
     if (s) s.parentNode.querySelectorAll('span').forEach(function (x) { x.classList.toggle('on', x === s); });
   });
 })();
+
+// category tiles: arrows scroll the row sideways
+(function () {
+  var wrap = document.querySelector('.tiles-wrap');
+  if (!wrap) return;
+  var row = wrap.querySelector('.tiles');
+  var l = wrap.querySelector('.tiles__arr--l'), r = wrap.querySelector('.tiles__arr--r');
+  function upd() {
+    l.disabled = row.scrollLeft < 4;
+    r.disabled = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4;
+  }
+  [l, r].forEach(function (b) {
+    b.addEventListener('click', function () { row.scrollBy({ left: Number(b.dataset.dir) * row.clientWidth * 0.8, behavior: 'smooth' }); });
+  });
+  row.addEventListener('scroll', upd, { passive: true });
+  window.addEventListener('resize', upd);
+  upd();
+})();
