@@ -45,17 +45,10 @@ function plural(n, one, few, many) {
 }
 function card(x) {
   var t = x.t || [];
-  var badges = [];
-  var pct = t.filter(function (v) { return v.indexOf('pct:') === 0; })[0];
-  if (pct) badges.push('<span class="bd">' + pct.slice(4) + '</span>');
-  else if (t.indexOf('sale') > -1) badges.push('<span class="bd">Акція</span>');
-  if (t.indexOf('hit') > -1) badges.push('<span class="bd bd--hit">Хіт</span>');
-  if (t.indexOf('new') > -1) badges.push('<span class="bd bd--new">Новинка</span>');
   var parts = t.indexOf('parts') > -1 || x.p >= 3000;
   return '<article class="pc">' +
     '<div class="pc__media"><a href="#" class="pc__img ph"><svg class="ic"><use href="#i-img"/></svg></a></div>' +
     '<div class="pc__bar">' +
-      '<div class="pc__badges">' + badges.join('') + '</div>' +
       '<div class="pc__btns">' +
         '<button class="pc-fav" aria-label="В обране"><svg class="ic"><use href="#i-heart"/></svg></button>' +
         '<button class="pc-cmp" aria-label="Порівняти"><svg class="ic"><use href="#i-scales"/></svg></button>' +
