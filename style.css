@@ -1049,3 +1049,38 @@ ul{list-style:none}
 }
 @media (max-width:760px){.hd__in{column-gap:12px}.hd__ic .ic,.hd__sbtn .ic{width:26px;height:26px}.hd__phone a{font-size:16px}}
 .st{white-space:nowrap}
+
+/* ===== slim bar that follows on scroll (like Rozetka) ===== */
+.hdm{position:fixed;left:0;right:0;top:0;z-index:120;background:#fff;box-shadow:0 2px 14px rgba(0,0,0,.12);transform:translateY(-110%);transition:transform .25s ease;visibility:hidden}
+.hdm.on{transform:none;visibility:visible}
+.hdm__in{display:flex;align-items:center;gap:16px;height:64px}
+.hdm .logo{order:-1;gap:8px;color:var(--accent)}
+.hdm .logo__mark{width:34px;height:31px}
+.hdm .logo__txt b{font:800 19px/1 'Montserrat',sans-serif;color:var(--ink);letter-spacing:-.02em}
+.hdm__cat{width:auto;z-index:2}
+.hdm__cat .cat__head{height:42px;padding:0 16px 0 12px;gap:8px;border-radius:8px;font-size:14px;text-transform:none;letter-spacing:0}
+.hdm__cat .cat__head .ic{display:block;width:20px;height:20px}
+.hdm__cat .cat__list{width:320px;right:auto;max-height:calc(100vh - 80px);overflow:auto}
+.hdm__search{flex:1;display:flex;align-items:center;gap:10px;height:44px;border:1.5px solid #dcdfe3;border-radius:22px;padding:0 4px 0 16px;color:#9aa0a6;transition:border-color .2s}
+.hdm__search:focus-within{border-color:var(--accent)}
+.hdm__search .ic{width:20px;height:20px}
+.hdm__search input{flex:1;border:0;outline:0;font:inherit;font-size:15px;color:var(--text);min-width:0;background:none}
+.hdm__search button{height:36px;padding:0 18px;border-radius:18px;background:var(--accent);color:#fff;font-weight:600;font-size:14px}
+.hdm__sbtn{display:none;color:var(--accent)}
+.hdm__sbtn .ic{width:26px;height:26px;stroke-width:1.5}
+.hdm .hd__ic .ic{width:28px;height:28px}
+.hdm .hd__ic i{top:-6px;right:-8px}
+@media (max-width:760px){
+  .hdm__in{height:56px;gap:12px}
+  .hdm__cat .cat__head{width:40px;height:40px;padding:0;justify-content:center;border-radius:8px}
+  .hdm__cat .cat__head span{display:none}
+  .hdm__cat .cat__list{position:fixed;left:0;right:0;top:56px;width:auto;border-radius:0;max-height:calc(100vh - 56px)}
+  .hdm .logo{order:0;margin-right:auto}
+  .hdm .logo__mark{width:30px;height:28px}
+  .hdm .logo__txt b{font-size:16px}
+  .hdm__search{display:none;position:absolute;left:12px;right:12px;top:62px;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+  .hdm.search-open .hdm__search{display:flex}
+  .hdm__sbtn{display:grid;place-items:center}
+  .hdm .hd__ic .ic,.hdm__sbtn .ic{width:25px;height:25px}
+  .hdm .hd__ic i{top:auto;bottom:-6px;right:-8px;min-width:18px;height:18px;font-size:10.5px;line-height:18px}
+}

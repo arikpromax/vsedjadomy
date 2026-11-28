@@ -162,6 +162,28 @@ var VD = (function () {
     if (document.body.dataset.page !== 'home') {
       el.insertAdjacentHTML('afterend', '<div class="wrap subnav"><nav class="cat cat--drop"><button class="cat__head">' + icon('menu') + '<span>Каталог товарів</span>' + icon('down', 'cat__dd') + '</button>' + catList() + '</nav><nav class="crumbs" id="crumbs"></nav></div>');
     }
+    // slim bar that follows the page when scrolled past the header (like Rozetka)
+    document.body.insertAdjacentHTML('afterbegin', '<div class="hdm" aria-hidden="true"><div class="wrap hdm__in">' +
+      '<nav class="cat cat--drop hdm__cat"><button class="cat__head" aria-label="Каталог">' + icon('grid') + '<span>Каталог</span></button>' + catList() + '</nav>' +
+      '<a class="logo hdm__logo" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b></span></a>' +
+      '<form class="hdm__search" action="katalog.html">' + icon('search') + '<input type="search" name="q" placeholder="Я шукаю…" autocomplete="off"><button>Знайти</button></form>' +
+      '<button class="hdm__sbtn" aria-label="Пошук">' + icon('search') + '</button>' +
+      '<a class="hd__ic hd__ic--cmp" href="porivniannia.html" aria-label="Порівняння">' + icon('scales') + '<i data-n="0">0</i></a>' +
+      '<a class="hd__ic hd__ic--user" href="kabinet.html" aria-label="Кабінет">' + icon('user') + '</a>' +
+      '<a class="hd__ic hic--cart" href="koshyk.html" aria-label="Кошик">' + icon('cart') + '<i data-n="0">0</i></a>' +
+      '</div></div>');
+    var bar = $('.hdm');
+    function follow() {
+      var on = el.getBoundingClientRect().bottom < 0;
+      if (on !== bar.classList.contains('on')) {
+        bar.classList.toggle('on', on); bar.setAttribute('aria-hidden', on ? 'false' : 'true');
+        if (!on) { bar.classList.remove('search-open'); $$('.cat--drop.open', bar).forEach(function (x) { x.classList.remove('open'); }); }
+      }
+    }
+    window.addEventListener('scroll', follow, { passive: true });
+    follow();
+    $('.hdm__sbtn').addEventListener('click', function () { bar.classList.toggle('search-open'); if (bar.classList.contains('search-open')) $('.hdm__search input').focus(); });
+
     var sb = $('.hd__sbtn');
     sb.addEventListener('click', function () { el.classList.toggle('search-open'); if (el.classList.contains('search-open')) $('.hd__search input').focus(); });
     $('.hd__call').addEventListener('click', callback);
