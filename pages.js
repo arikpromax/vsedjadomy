@@ -428,7 +428,7 @@
     if (!city.ref) npCities(city.name).then(l => { const x = l.find(a => a.name === city.name) || l[0]; if (x) { city.ref = x.ref; city.area = x.area; store.set('city', city); drawCity(); } }).catch(() => {});
     $('.city__ch').addEventListener('click', pickCity);
     function pickCity() {
-      const quick = ['Нова Одеса', 'Миколаїв', 'Одеса', 'Київ', 'Вознесенськ', 'Первомайськ'];
+      const quick = ['Київ', 'Харків', 'Одеса', 'Дніпро', 'Запоріжжя', 'Львів'];
       const m = V.modal(`<h3 class="modal__t">Куди доставити замовлення?</h3>
         <p class="modal__p">Вкажіть ваш населений пункт, щоб бачити доступні способи доставки</p>
         <label class="fld"><span>Населений пункт</span><input class="cityq" value="${esc(city.name)}" autocomplete="off"></label>
@@ -437,7 +437,7 @@
         <div class="modal__foot"><button type="button" class="btn btn--line modal__close">Закрити</button></div>`);
       const inp = $('.cityq', m), ac = $('.ac', m);
       let timer, last = [];
-      const choose = a => { Object.assign(city, { name: a.name, area: a.area, ref: a.ref }); store.set('city', city); drawCity(); st.point = null; renderDlv(); V.closeModal(); };
+      const choose = a => { Object.assign(city, { name: a.name, area: a.area, ref: a.ref }); store.set('city', city); drawCity(); st.point = null; renderDlv(); inp.value = a.name; ac.innerHTML = ''; $$('.cityq__chips button', m).forEach(b => b.classList.toggle('on', b.textContent === a.name)); }; // вікно лишається відкритим — закриває «Закрити»
       const hl = (s, q) => esc(s).replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<b>$1</b>');
       const search = q => {
         if (q.trim().length < 2) { ac.innerHTML = ''; return; }
