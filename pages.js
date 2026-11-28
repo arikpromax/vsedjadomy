@@ -43,9 +43,10 @@
       box.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) { show(cur + (dx < 0 ? 1 : -1)); auto(); } x0 = null; });
       auto();
     }
-    // плитки категорій
+    // плитки-підбірки під банером
     const tw = $('.tiles-wrap');
     if (tw) {
+      $('.tiles', tw).innerHTML = SETS.map(s => { const n = PRODUCTS.filter(s.f).length; return `<a class="tile" href="katalog.html?set=${s.id}"><span class="tile__ic">${icon(s.ic)}</span><b>${esc(s.n)}</b><small>${goods(n)}</small></a>`; }).join('');
       const row = $('.tiles', tw), l = $('.tiles__arr--l', tw), r = $('.tiles__arr--r', tw);
       const upd = () => { l.disabled = row.scrollLeft < 4; r.disabled = row.scrollLeft + row.clientWidth >= row.scrollWidth - 4; };
       [l, r].forEach(b => b.addEventListener('click', () => row.scrollBy({ left: Number(b.dataset.dir) * row.clientWidth * 0.8, behavior: 'smooth' })));
@@ -72,18 +73,19 @@
 
   /* ================= КАТАЛОГ ================= */
   function katalog() {
-    const catId = V.param('cat'), q = (V.param('q') || '').trim(), c = V.cat(catId);
+    const catId = V.param('cat'), q = (V.param('q') || '').trim(), c = V.cat(catId), set = SETS.find(s => s.id === V.param('set'));
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
     let pool = PRODUCTS.filter(p => {
+      if (set) return set.f(p);
       if (catId === 'akcii') return !!p.o;
       if (catId === 'novynky') return (p.t || []).includes('new');
       if (c) return p.cat === catId;
       return true;
     });
     if (words.length) pool = pool.filter(p => { const s = (p.n + ' ' + (V.cat(p.cat) || {}).n).toLowerCase(); return words.every(w => s.includes(w)); });
-    const title = q ? 'Результати пошуку «' + q + '»' : c ? c.n : 'Усі товари';
+    const title = q ? 'Результати пошуку «' + q + '»' : set ? set.n : c ? c.n : 'Усі товари';
     document.title = title + ' — Все для дому';
-    V.crumbs(q ? [{ n: 'Пошук' }] : [{ n: c ? c.n : 'Каталог' }]);
+    V.crumbs(q ? [{ n: 'Пошук' }] : set ? [{ n: 'Підбірки' }, { n: set.n }] : [{ n: c ? c.n : 'Каталог' }]);
     const isToys = pool.some(p => p.age);
     const st = { min: '', max: '', sale: false, parts: false, hit: false, isnew: false, g: '', age: '', sort: 'pop', shown: 12, cat: '' };
     const prices = pool.map(p => p.p);
@@ -343,57 +345,15 @@
   /* ================= КОШИК ================= */
   function koshyk() {
     V.crumbs([{ n: 'Кошик' }]);
-    function draw() {
-      const cart = store.cart().filter(i => V.byId(i.id));
-      if (!cart.length) { root.innerHTML = `<h1 class="title page__t">Кошик</h1><div class="empty">${icon('cart')}<h3>Кошик порожній</h3><p>Додайте товари з каталогу — вони з’являться тут.</p><a class="btn btn--accent" href="katalog.html">До каталогу</a></div>`; return; }
-      const sum = store.total(), old = cart.reduce((s, i) => { const p = V.byId(i.id); return s + (p.o || p.p) * i.q; }, 0), n = store.count();
-      root.innerHTML = `<h1 class="title page__t">Кошик</h1>
-        <div class="cartp">
-          <div class="cartp__list">${cart.map(i => { const p = V.byId(i.id); return `
-            <div class="ci" data-id="${p.id}">
-              <a class="ci__img ph" href="${V.url(p)}">${icon('img')}</a>
-              <div class="ci__info"><a class="ci__n" href="${V.url(p)}">${esc(p.n)}</a><span class="ci__code">Код: ${V.code(p)}${i.col != null && p.col ? ` · колір <i style="background:${p.col[i.col]}"></i>` : ''}</span>
-                <div class="ci__price">${p.o ? `<s>${money(p.o)}</s>` : ''}<b class="${p.o ? 'is-sale' : ''}">${money(p.p)}</b></div></div>
-              <div class="qty"><button data-d="-1" aria-label="Менше">${icon('minus')}</button><input value="${i.q}" inputmode="numeric" aria-label="Кількість"><button data-d="1" aria-label="Більше">${icon('plus')}</button></div>
-              <b class="ci__sum">${money(p.p * i.q)}</b>
-              <button class="ci__del" aria-label="Видалити">${icon('trash')}</button>
-            </div>`; }).join('')}
-            <div class="cartp__foot"><a href="katalog.html">${icon('left')}Продовжити покупки</a><button class="cartp__clear">${icon('trash')}Очистити кошик</button></div>
-          </div>
-          <aside class="sum">
-            <h3>Разом</h3>
-            <div><span>${goods(n)} на суму</span><b>${money(old)}</b></div>
-            ${old > sum ? `<div class="sum__disc"><span>Знижка</span><b>−${money(old - sum)}</b></div>` : ''}
-            <div><span>Доставка</span><b>за тарифами перевізника</b></div>
-            <div class="sum__total"><span>До сплати</span><b>${money(sum)}</b></div>
-            ${sum >= 500 ? `<p class="sum__parts">${icon('parts')}або від ${money(Math.ceil(sum / 24))} × 24 міс частинами</p>` : ''}
-            <a class="btn btn--accent btn--wide" href="oformlennia.html">Оформити замовлення</a>
-          </aside>
-        </div>`;
-    }
-    root.addEventListener('click', e => {
-      const row = e.target.closest('.ci');
-      if (e.target.closest('.cartp__clear')) { store.setCart([]); draw(); return; }
-      if (!row) return;
-      const id = +row.dataset.id, c = store.cart(), it = c.find(i => i.id === id);
-      if (e.target.closest('.ci__del')) { store.setCart(c.filter(i => i.id !== id)); V.toast('Товар прибрано з кошика'); draw(); return; }
-      const d = e.target.closest('[data-d]');
-      if (d) { it.q = Math.max(1, Math.min(99, it.q + +d.dataset.d)); store.setCart(c); draw(); }
-    });
-    root.addEventListener('change', e => {
-      const row = e.target.closest('.ci'); if (!row || e.target.tagName !== 'INPUT') return;
-      const c = store.cart(), it = c.find(i => i.id === +row.dataset.id);
-      it.q = Math.max(1, Math.min(99, parseInt(e.target.value, 10) || 1)); store.setCart(c); draw();
-    });
-    draw();
+    V.cartView(root);
   }
 
   /* ================= ОФОРМЛЕННЯ ================= */
   function oformlennia() {
     V.crumbs([{ n: 'Кошик', href: 'koshyk.html' }, { n: 'Оформлення замовлення' }]);
-    const cart = store.cart().filter(i => V.byId(i.id));
+    const cart = V.selected();
     if (!cart.length) { root.innerHTML = `<h1 class="title page__t">Оформлення замовлення</h1><div class="empty">${icon('cart')}<h3>Кошик порожній</h3><a class="btn btn--accent" href="katalog.html">До каталогу</a></div>`; return; }
-    const sum = store.total(), u = store.user() || {}, pref = store.pref() || {};
+    const sum = cart.reduce((s, i) => s + V.byId(i.id).p * i.q, 0), qty = cart.reduce((s, i) => s + i.q, 0), u = store.user() || {}, pref = store.pref() || {};
     const city = store.get('city', { name: 'Нова Одеса', area: 'Миколаївська обл., Миколаївський р-н', ref: null });
     const st = { dlv: pref.dlv || (city.name === 'Нова Одеса' ? 'pickup' : 'np'), pay: pref.method || 'cod', bank: pref.bank || BANKS[0].id, n: pref.n || 4, term: pref.term || 12, point: null };
     const DLV = [
@@ -449,7 +409,7 @@
         </div>
         <aside class="sum co__sum">
           <h3>Разом</h3>
-          <div><span>${goods(store.count())} на суму</span><b>${money(sum)}</b></div>
+          <div><span>${goods(qty)} на суму</span><b>${money(sum)}</b></div>
           <div><span>Вартість доставки</span><b class="co__dprice"></b></div>
           <div class="sum__total"><span>До сплати</span><b>${money(sum)}</b></div>
           <p class="co__payline"></p>
@@ -584,7 +544,7 @@
       });
       const usr = store.user();
       if (usr) store.setUser(Object.assign(usr, { phone: usr.phone || V.phoneDigits(f.phone.value), name: usr.name || v('name'), surname: usr.surname || v('surname'), patr: usr.patr || v('patr') }));
-      store.setCart([]); store.setPref(null);
+      store.setCart(store.cart().filter(i => i.sel === false)); store.setPref(null);
       if (st.pay === 'card' || st.pay === 'parts' || st.pay === 'credit') payStep(o); else done(o);
     });
 
