@@ -1177,3 +1177,32 @@ ul{list-style:none}
   .co__lg{grid-template-columns:1fr;gap:16px}
   .co__perks{padding:14px 16px;gap:12px}
 }
+
+/* ===== search suggestions ===== */
+input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+.hd__search,.hdm__search{position:relative}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:150;background:#fff;border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.18);padding:8px;max-height:min(70vh,560px);overflow:auto;color:var(--text);cursor:default;text-align:left}
+.sug__h{font-size:12.5px;color:var(--muted);padding:8px 10px 6px}
+.sug__pop a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14.5px}
+.sug__pop .ic{width:16px;height:16px;color:#9aa0a6}
+.sug__cats{display:flex;flex-wrap:wrap;gap:6px;padding:6px 6px 10px;border-bottom:1px solid #eceef0;margin-bottom:6px}
+.sug__cats a{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:18px;background:var(--bg);font-size:13.5px;font-weight:500}
+.sug__cats .ic{width:16px;height:16px;color:var(--accent)}
+.sug__it{display:grid;grid-template-columns:40px minmax(0,1fr) auto;align-items:center;gap:12px;padding:8px 10px;border-radius:8px;font-size:14.5px}
+.sug__it .ph{width:40px;height:40px;border:1px solid #eceef0;border-radius:6px}
+.sug__it .ph .ic{width:18px;height:18px}
+.sug__n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sug__n b{color:var(--accent);font-weight:700}
+.sug__it>b{font:800 15px 'Montserrat',sans-serif;white-space:nowrap}
+.sug__it>b.is-sale{color:var(--accent)}
+.sug__all{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px;padding:11px;border-top:1px solid #eceef0;font-weight:600;color:#3a66c4;font-size:14px}
+.sug__all .ic{width:16px;height:16px}
+.sug__none{padding:12px 10px 4px;font-size:14px;color:var(--muted)}
+.sug a:hover,.sug a.on{background:var(--accent-l)}
+.sug__cats a:hover,.sug__cats a.on{background:var(--accent-l);color:var(--accent)}
+@media (max-width:760px){
+  .sug{max-height:60vh}
+  .sug__it{grid-template-columns:34px minmax(0,1fr) auto;gap:10px;font-size:13.5px}
+  .sug__it .ph{width:34px;height:34px}
+}
+@media (min-width:761px){.hd .sug{min-width:560px}}

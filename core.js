@@ -151,7 +151,7 @@ var VD = (function () {
     el.innerHTML = '<div class="wrap hd__in">' +
       '<a class="logo" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b><small>техніка · іграшки · велосипеди</small></span></a>' +
       '<button class="hd__sbtn" aria-label="Пошук">' + icon('search') + '</button>' +
-      '<form class="hd__search" action="katalog.html">' + icon('search') + '<input type="search" name="q" placeholder="Пошук товару" value="' + esc(param('q') || '') + '" autocomplete="off"></form>' +
+      '<form class="hd__search" action="katalog.html">' + icon('search') + '<input type="text" enterkeyhint="search" name="q" placeholder="Пошук товару" value="' + esc(param('q') || '') + '" autocomplete="off"></form>' +
       '<div class="hd__phone"><a href="' + SHOP.phoneHref + '"><b>' + SHOP.phone + '</b>' + icon('down') + '</a><small>Нова Одеса, Центральна, 172</small></div>' +
       '<button class="hd__call">Передзвоніть мені</button>' +
       '<a class="hd__ic hd__ic--cmp" href="porivniannia.html">' + icon('scales') + '<i data-n="0">0</i><span>Порівняння</span></a>' +
@@ -165,7 +165,7 @@ var VD = (function () {
     document.body.insertAdjacentHTML('afterbegin', '<div class="hdm" aria-hidden="true"><div class="wrap hdm__in">' +
       '<nav class="cat cat--drop hdm__cat"><button class="cat__head" aria-label="Каталог">' + icon('grid') + '<span>Каталог</span></button>' + catList() + '</nav>' +
       '<a class="logo hdm__logo" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b></span></a>' +
-      '<form class="hdm__search" action="katalog.html">' + icon('search') + '<input type="search" name="q" placeholder="Я шукаю…" autocomplete="off"><button>Знайти</button></form>' +
+      '<form class="hdm__search" action="katalog.html">' + icon('search') + '<input type="text" enterkeyhint="search" name="q" placeholder="Я шукаю…" autocomplete="off"><button>Знайти</button></form>' +
       '<button class="hdm__sbtn" aria-label="Пошук">' + icon('search') + '</button>' +
       '<a class="hd__ic hd__ic--cmp" href="porivniannia.html" aria-label="Порівняння">' + icon('scales') + '<i data-n="0">0</i></a>' +
       '<a class="hd__ic hd__ic--user" href="kabinet.html" aria-label="Кабінет">' + icon('user') + '</a>' +
@@ -272,6 +272,103 @@ var VD = (function () {
       wrap.style.maxHeight = (last.offsetTop + last.offsetHeight) + 'px';
     }
     fit();
+  }
+
+  /* ---------- search: word starts, Russian/Ukrainian spelling, wrong keyboard layout ---------- */
+  var LAT = "qwertyuiop[]asdfghjkl;'zxcvbnm,.", CYR = 'йцукенгшщзхїфівапролджєячсмитьбю';
+  // російське / розмовне слово → як у назвах товарів (довші ключі першими)
+  var SYN = [['микроволнов', 'микрохвильов'], ['холодос', 'холодильник'], ['пылесос', 'пилосос'], ['обогрев', 'обигрив'], ['стирал', 'прал'], ['одеял', 'ковдр'], ['детск', 'дитяч'],
+    ['игруш', 'играш'], ['телик', 'телевиз'], ['велик', 'велосипед'], ['ковер', 'килим'], ['ковр', 'килим'], ['обои', 'шпалер'], ['кукл', 'ляльк'], ['утюг', 'праск'],
+    ['лего', 'конструктор'], ['дрон', 'квадрокоптер'], ['тв', 'телевиз']];
+  function norm(s) {
+    return String(s).toLowerCase().replace(/[’'ʼ`"«»]/g, '').replace(/[іїыиi]/g, 'и').replace(/[єэёe]/g, 'е').replace(/ґ/g, 'г').replace(/ъ/g, '').replace(/[^a-zа-я0-9]+/g, ' ').trim();
+  }
+  function swapLayout(s) { return String(s).toLowerCase().split('').map(function (ch) { var i = LAT.indexOf(ch); return i > -1 ? CYR[i] : ch; }).join(''); }
+  function words(s) { return norm(s).split(' ').filter(Boolean); }
+  function synonym(w) { for (var i = 0; i < SYN.length; i++) { var k = norm(SYN[i][0]); if (w.indexOf(k) === 0) return norm(SYN[i][1]) + w.slice(k.length); } return null; }
+  var INDEX = null;
+  function index() {
+    if (INDEX) return INDEX;
+    INDEX = PRODUCTS.map(function (p) { var c = cat(p.cat); return { p: p, name: norm(p.n), w: words(p.n), cw: words(c ? c.n : '') }; });
+    return INDEX;
+  }
+  function scoreFor(q) {
+    var qw = words(q); if (!qw.length) return [];
+    return index().map(function (x) {
+      var total = 0;
+      for (var i = 0; i < qw.length; i++) {
+        var w = qw[i], alt = synonym(w), best = 0;
+        [w, alt].forEach(function (v) {
+          if (!v) return;
+          if (x.w.some(function (t) { return t.indexOf(v) === 0; })) best = Math.max(best, v === w ? 3 : 2);
+          // середина слова чи збіг лише з категорією — тільки для слів від 4 літер, щоб «вел» не тягнув «Велику техніку»
+          else if (v.length > 3 && x.name.indexOf(v) > -1) best = Math.max(best, 1);
+          else if (v.length > 3 && x.cw.some(function (t) { return t.indexOf(v) === 0; })) best = Math.max(best, 1);
+        });
+        if (!best) return null;
+        total += best;
+      }
+      if (x.name.indexOf(qw.join(' ')) === 0) total += 3;
+      return { p: x.p, s: total };
+    }).filter(Boolean).sort(function (a, b) { return b.s - a.s || b.p.c - a.p.c; }).map(function (r) { return r.p; });
+  }
+  function search(q) {
+    var r = scoreFor(q);
+    if (!r.length && /[a-z\[\];',.]/i.test(q)) r = scoreFor(swapLayout(q)); // набрали англійською розкладкою
+    return r;
+  }
+  function searchCats(q) {
+    var qw = words(q); if (!qw.length) return [];
+    var alts = qw.map(function (w) { return [w, synonym(w)]; });
+    function hit(n) { var nw = words(n); return alts.every(function (a) { return a.some(function (v) { return v && nw.some(function (t) { return t.indexOf(v) === 0; }); }); }); }
+    var out = CATS.filter(function (c) { return hit(c.n); }).map(function (c) { return { n: c.n, href: 'katalog.html?cat=' + c.id, ic: c.ic }; });
+    if (typeof SETS !== 'undefined') out = out.concat(SETS.filter(function (s) { return hit(s.n); }).map(function (s) { return { n: s.n, href: 'katalog.html?set=' + s.id, ic: s.ic }; }));
+    return out.slice(0, 4);
+  }
+  function hl(text, q) {
+    var t = esc(text), qw = words(q).concat(words(swapLayout(q))).filter(function (w) { return w.length; });
+    if (!qw.length) return t;
+    // підсвічуємо початки слів, що збігаються (з урахуванням і/и, є/е)
+    return t.replace(/[A-Za-zА-Яа-яІіЇїЄєҐґ0-9’']+/g, function (word) {
+      var nw = norm(word);
+      for (var i = 0; i < qw.length; i++) { var w = qw[i]; if (w && nw.indexOf(w) === 0) return '<b>' + word.slice(0, w.length) + '</b>' + word.slice(w.length); }
+      return word;
+    });
+  }
+  var POPULAR = ['пральна машина', 'конструктор', 'коляска', 'велосипед', 'обігрівач', 'лялька', 'телевізор'];
+  function suggest(form) {
+    var input = $('input', form), box = document.createElement('div'), items = [], cur = -1;
+    box.className = 'sug'; box.hidden = true; form.appendChild(box);
+    function render() {
+      var q = input.value.trim(); cur = -1;
+      if (!q) {
+        box.innerHTML = '<div class="sug__h">Популярні запити</div><div class="sug__pop">' + POPULAR.map(function (x) { return '<a href="katalog.html?q=' + encodeURIComponent(x) + '">' + icon('search') + x + '</a>'; }).join('') + '</div>';
+      } else {
+        var found = search(q), cats = searchCats(q);
+        if (!found.length && !cats.length) {
+          box.innerHTML = '<div class="sug__none">Нічого не знайшли за «' + esc(q) + '». Спробуйте інше слово.</div><div class="sug__h">Популярні запити</div><div class="sug__pop">' + POPULAR.slice(0, 5).map(function (x) { return '<a href="katalog.html?q=' + encodeURIComponent(x) + '">' + icon('search') + x + '</a>'; }).join('') + '</div>';
+        } else {
+          box.innerHTML = (cats.length ? '<div class="sug__cats">' + cats.map(function (c) { return '<a href="' + c.href + '">' + icon(c.ic) + esc(c.n) + '</a>'; }).join('') + '</div>' : '') +
+            found.slice(0, 6).map(function (p) {
+              return '<a class="sug__it" href="' + url(p) + '"><span class="ph">' + icon('img') + '</span><span class="sug__n">' + hl(p.n, q) + '</span><b class="' + (p.o ? 'is-sale' : '') + '">' + money(p.p) + '</b></a>';
+            }).join('') +
+            (found.length ? '<a class="sug__all" href="katalog.html?q=' + encodeURIComponent(q) + '">Показати всі результати (' + found.length + ')' + icon('arrow') + '</a>' : '');
+        }
+      }
+      items = $$('a', box);
+      box.hidden = false;
+    }
+    function move(d) { if (!items.length) return; cur = (cur + d + items.length) % items.length; items.forEach(function (a, i) { a.classList.toggle('on', i === cur); }); items[cur].scrollIntoView({ block: 'nearest' }); }
+    input.addEventListener('input', render);
+    input.addEventListener('focus', render);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (box.hidden) render(); move(1); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+      else if (e.key === 'Enter' && cur > -1 && items[cur]) { e.preventDefault(); location.href = items[cur].href; }
+      else if (e.key === 'Escape') { box.hidden = true; input.blur(); }
+    });
+    document.addEventListener('click', function (e) { if (!form.contains(e.target)) box.hidden = true; });
+    form.addEventListener('submit', function (e) { if (!input.value.trim()) { e.preventDefault(); input.focus(); } });
   }
 
   /* ---------- cart: one view for the pop-up and for koshyk.html ---------- */
@@ -392,6 +489,7 @@ var VD = (function () {
   header();
   footer();
   paint();
+  $$('.hd__search, .hdm__search').forEach(suggest);
   $$('[data-maps]').forEach(function (a) { a.href = SHOP.maps; });
   window.addEventListener('storage', paint);
 
@@ -399,7 +497,7 @@ var VD = (function () {
     $: $, $$: $$, money: money, plural: plural, esc: esc, param: param, icon: icon, byId: byId, cat: cat, url: url, code: code,
     store: store, toast: toast, modal: modal, closeModal: closeModal, card: card, collapse: collapse, paint: paint,
     phoneFmt: phoneFmt, phoneOk: phoneOk, phoneDigits: phoneDigits, phoneMask: phoneMask, bad: bad,
-    auth: auth, authHtml: authHtml, authBind: authBind, cartView: cartView, cartOpen: cartOpen, selected: selected,
+    auth: auth, authHtml: authHtml, authBind: authBind, search: search, cartView: cartView, cartOpen: cartOpen, selected: selected,
     crumbs: function (list) {
       var el = $('#crumbs'); if (!el) return;
       el.innerHTML = '<a href="index.html">Головна</a>' + list.map(function (x) { return icon('right') + (x.href ? '<a href="' + x.href + '">' + esc(x.n) + '</a>' : '<span>' + esc(x.n) + '</span>'); }).join('');

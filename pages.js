@@ -82,12 +82,13 @@
       if (c) return p.cat === catId;
       return true;
     });
-    if (words.length) pool = pool.filter(p => { const s = (p.n + ' ' + (V.cat(p.cat) || {}).n).toLowerCase(); return words.every(w => s.includes(w)); });
+    const rank = {};
+    if (words.length) { V.search(q).forEach((p, i) => { rank[p.id] = i; }); pool = pool.filter(p => p.id in rank); }
     const title = q ? 'Результати пошуку «' + q + '»' : set ? set.n : c ? c.n : 'Усі товари';
     document.title = title + ' — Все для дому';
     V.crumbs(q ? [{ n: 'Пошук' }] : set ? [{ n: 'Підбірки' }, { n: set.n }] : [{ n: c ? c.n : 'Каталог' }]);
     const isToys = pool.some(p => p.age);
-    const st = { min: '', max: '', sale: false, parts: false, hit: false, isnew: false, g: '', age: '', sort: 'pop', shown: 12, cat: '' };
+    const st = { min: '', max: '', sale: false, parts: false, hit: false, isnew: false, g: '', age: '', sort: words.length ? 'rel' : 'pop', shown: 12, cat: '' };
     const prices = pool.map(p => p.p);
     const lo = prices.length ? Math.min(...prices) : 0, hi = prices.length ? Math.max(...prices) : 0;
     const catsHere = [...new Set(pool.map(p => p.cat))];
@@ -120,7 +121,7 @@
           <div class="kat__bar">
             <button class="kat__fbtn">${icon('filter')}Фільтри</button>
             <label class="kat__sort">Сортування:<select>
-              <option value="pop">За популярністю</option><option value="cheap">Від дешевих до дорогих</option>
+              ${words.length ? '<option value="rel">За відповідністю</option>' : ''}<option value="pop">За популярністю</option><option value="cheap">Від дешевих до дорогих</option>
               <option value="exp">Від дорогих до дешевих</option><option value="rate">За рейтингом</option><option value="new">Новинки</option></select></label>
           </div>
           <div class="kat__chips"></div>
@@ -136,7 +137,7 @@
         && (!st.hit || (p.t || []).includes('hit')) && (!st.isnew || (p.t || []).includes('new'))
         && (!st.g || p.g === st.g || p.g === 'u')
         && (!st.age || (p.age && (st.age === '0' ? p.age[0] < 3 : st.age === '3' ? p.age[0] <= 7 && p.age[1] >= 3 : p.age[1] >= 8))));
-      const s = { pop: (a, b) => b.c - a.c, cheap: (a, b) => a.p - b.p, exp: (a, b) => b.p - a.p, rate: (a, b) => b.r - a.r || b.c - a.c, new: (a, b) => ((b.t || []).includes('new') - (a.t || []).includes('new')) || b.id - a.id }[st.sort];
+      const s = { rel: (a, b) => rank[a.id] - rank[b.id], pop: (a, b) => b.c - a.c, cheap: (a, b) => a.p - b.p, exp: (a, b) => b.p - a.p, rate: (a, b) => b.r - a.r || b.c - a.c, new: (a, b) => ((b.t || []).includes('new') - (a.t || []).includes('new')) || b.id - a.id }[st.sort];
       return l.sort(s);
     }
     function chips() {
