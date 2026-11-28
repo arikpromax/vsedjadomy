@@ -149,7 +149,7 @@ var VD = (function () {
     if (!el) return;
     var u = store.user();
     el.innerHTML = '<div class="wrap hd__in">' +
-      '<a class="logo" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b><small>техніка · іграшки · велосипеди</small></span></a>' +
+      '<a class="logo logo--img" href="index.html" aria-label="Все для дому — на головну"><img src="logo.webp" alt="Все для дому" width="250" height="40"></a>' +
       '<button class="hd__sbtn" aria-label="Пошук">' + icon('search') + '</button>' +
       '<form class="hd__search" action="katalog.html">' + icon('search') + '<input type="text" enterkeyhint="search" name="q" placeholder="Пошук товару" value="' + esc(param('q') || '') + '" autocomplete="off"></form>' +
       '<div class="hd__phone"><a href="' + SHOP.phoneHref + '"><b>' + SHOP.phone + '</b>' + icon('down') + '</a><small>Нова Одеса, Центральна, 172</small></div>' +
@@ -164,7 +164,7 @@ var VD = (function () {
     // slim bar that follows the page when scrolled past the header (like Rozetka)
     document.body.insertAdjacentHTML('afterbegin', '<div class="hdm" aria-hidden="true"><div class="wrap hdm__in">' +
       '<nav class="cat cat--drop hdm__cat"><button class="cat__head" aria-label="Каталог">' + icon('grid') + '<span>Каталог</span></button>' + catList() + '</nav>' +
-      '<a class="logo hdm__logo" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b></span></a>' +
+      '<a class="logo logo--img hdm__logo" href="index.html" aria-label="Все для дому — на головну"><img src="logo.webp" alt="Все для дому" width="190" height="30"></a>' +
       '<form class="hdm__search" action="katalog.html">' + icon('search') + '<input type="text" enterkeyhint="search" name="q" placeholder="Я шукаю…" autocomplete="off"><button>Знайти</button></form>' +
       '<button class="hdm__sbtn" aria-label="Пошук">' + icon('search') + '</button>' +
       '<a class="hd__ic hd__ic--cmp" href="porivniannia.html" aria-label="Порівняння">' + icon('scales') + '<i data-n="0">0</i></a>' +
@@ -191,7 +191,7 @@ var VD = (function () {
     var el = $('#ft');
     if (!el) return;
     el.innerHTML = '<div class="wrap foot__in">' +
-      '<div><a class="logo logo--light" href="index.html"><svg class="logo__mark"><use href="#i-house"/></svg><span class="logo__txt"><b>Все для дому</b><small>техніка · іграшки · велосипеди</small></span></a>' +
+      '<div><a class="logo logo--img logo--foot" href="index.html" aria-label="Все для дому — на головну"><img src="logo.webp" alt="Все для дому" width="220" height="35"></a>' +
       '<p>' + SHOP.address + '<br><a href="' + SHOP.phoneHref + '">' + SHOP.phone + '</a></p>' +
       '<div class="soc"><a href="' + SHOP.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + icon('ig') + '</a></div></div>' +
       '<div><h4>Каталог</h4>' + CATS.slice(2, 9).map(function (c) { return '<a href="katalog.html?cat=' + c.id + '">' + c.n + '</a>'; }).join('') + '</div>' +
