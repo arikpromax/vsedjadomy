@@ -1157,3 +1157,23 @@ ul{list-style:none}
   .cm__row .pc{flex-basis:160px}
   .tiles-wrap .tile small{display:none}
 }
+
+/* hidden must always hide, even when a class sets display */
+[hidden]{display:none!important}
+
+/* login: chosen way is highlighted, the email field opens under the buttons */
+.auth__btns .btn.on{box-shadow:inset 0 0 0 1.5px var(--accent);background:var(--accent-l)}
+.auth__form{margin-top:14px}
+
+/* checkout login block: buttons on the left, what you get on the right */
+.co__lg{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:28px;align-items:start}
+.co__login .auth{max-width:none}
+.co__perks{list-style:none;display:flex;flex-direction:column;gap:14px;background:var(--bg);border-radius:10px;padding:18px 20px}
+.co__perks li{display:flex;gap:12px;font-size:13.5px;color:var(--muted);line-height:1.4}
+.co__perks .ic{width:22px;height:22px;color:var(--accent);flex:none;stroke-width:1.6}
+.co__perks b{display:block;color:var(--text);font-size:14.5px}
+.co__perks-guest{border-top:1px dashed #d9dce0;padding-top:14px}
+@media (max-width:760px){
+  .co__lg{grid-template-columns:1fr;gap:16px}
+  .co__perks{padding:14px 16px;gap:12px}
+}

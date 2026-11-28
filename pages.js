@@ -375,7 +375,7 @@
       <form class="co" novalidate>
         <div class="co__main">
           ${u.email ? `<section class="co__sec co__me">${icon('user')}<p>Ви увійшли як <b>${esc(u.email)}</b></p><a href="kabinet.html">Кабінет</a></section>`
-            : `<section class="co__sec co__login"><div class="co__h"><h2>Увійдіть для оформлення замовлення</h2></div><div class="co__auth"></div><p class="co__guest">або просто заповніть дані нижче — оформимо й без входу</p></section>`}
+            : `<section class="co__sec co__login"><div class="co__h"><h2>Увійдіть для оформлення замовлення</h2></div><div class="co__lg"><div class="co__auth"></div><ul class="co__perks"><li>${icon('box')}<span><b>Статус замовлення в кабінеті</b>Бачите, коли зібрали й відправили, і номер ТТН</span></li><li>${icon('bolt')}<span><b>Наступного разу — у 2 кліки</b>Запам’ятаємо отримувача й адресу доставки</span></li><li>${icon('heart')}<span><b>Обране й порівняння</b>Зберігаються у вашому кабінеті</span></li><li class="co__perks-guest">${icon('user')}<span><b>Можна й без входу</b>Просто заповніть дані нижче</span></li></ul></div></section>`}
           <section class="co__sec"><div class="co__h"><h2>Замовлення</h2><a href="koshyk.html">${icon('edit')}Редагувати</a></div>
             <div class="co__items">${cart.map(i => { const p = V.byId(i.id); return `<div class="co__item"><span class="ph">${icon('img')}</span><a href="${V.url(p)}">${esc(p.n)}</a><span>${i.q} шт.</span><b>${money(p.p * i.q)}</b></div>`; }).join('')}</div></section>
 

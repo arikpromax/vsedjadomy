@@ -99,14 +99,14 @@ var VD = (function () {
       '<label class="fld"><span>Електронна пошта</span><input name="email" type="email" autocomplete="email" placeholder="name@gmail.com"></label>' +
       '<div class="auth__code" hidden><label class="fld"><span>Код із листа</span><input name="code" inputmode="numeric" maxlength="4" autocomplete="one-time-code"></label>' +
       '<p class="auth__demo">Демо-режим: листи ще не підключено, введіть <b>1234</b></p></div>' +
-      '<button type="button" class="btn btn--accent btn--wide auth__go">Отримати код</button><button type="button" class="auth__back">' + icon('left') + 'Інші способи входу</button></div></div>';
+      '<button type="button" class="btn btn--accent btn--wide auth__go">Отримати код</button></div></div>';
   }
   function authBind(box, done) {
     // a plain block, not a <form>: it also sits inside the checkout form
     var f = $('.auth__form', box), btns = $('.auth__btns', box), go = $('.auth__go', box), step = 1, via = 'email';
     var email = $('[name=email]', f), codeIn = $('[name=code]', f);
     function open(v) {
-      via = v; btns.hidden = true; f.hidden = false; step = 1;
+      via = v; f.hidden = false; step = 1; $('.auth__g', box).classList.toggle('on', v === 'google'); $('.auth__e', box).classList.toggle('on', v === 'email');
       $('.auth__via', f).innerHTML = v === 'google'
         ? '<b>Вхід через Google</b> (демо): після запуску тут відкриється вікно Google. Поки вкажіть Gmail.'
         : '<b>Вхід через пошту:</b> надішлемо код на вашу адресу.';
@@ -123,7 +123,6 @@ var VD = (function () {
     }
     $('.auth__g', box).addEventListener('click', function () { open('google'); });
     $('.auth__e', box).addEventListener('click', function () { open('email'); });
-    $('.auth__back', box).addEventListener('click', function () { f.hidden = true; btns.hidden = false; });
     go.addEventListener('click', submit);
     f.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
   }
