@@ -1221,3 +1221,8 @@ input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;disp
 .hd__phone,.hd__call,.hd__ic{white-space:nowrap;flex:none}
 .hd__search{min-width:0}
 @media (max-width:1300px) and (min-width:1201px){.hd__call{padding:0 14px;font-size:13.5px}}
+/* phone: the sticky bar search opens UNDER the bar (later .hdm__search{position:relative} must not win) */
+@media (max-width:760px){.hdm .hdm__search{position:absolute;left:12px;right:12px;top:62px;height:46px;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.14)}.hdm .hdm__search button{display:none}}
+/* iPhone: fields under 16px make Safari/Telegram zoom the page on focus */
+@media (max-width:760px){input,select,textarea{font-size:16px!important}}
+a,button,label{-webkit-tap-highlight-color:transparent}
